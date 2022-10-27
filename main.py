@@ -3,8 +3,7 @@ import json
 from sqlalchemy.orm import sessionmaker
 from alchemy import create_tables, Publisher, Shop, Sale, Stock, Book
 
-DSN = ''
-
+DSN = 'postgresql://postgres:29fihonu@localhost:5432/Alchemy'
 
 engine = sqlalchemy.create_engine(DSN)
 
@@ -32,17 +31,19 @@ session.close()
 query = session.query(Publisher, Book, Shop, Stock)
 query = query.join(Publisher, Publisher.id == Book.id_publisher)
 query = query.join(Stock, Book.id == Stock.id_book)
-query = query.join(Shop, Stock.id_shop == Shop.id)
-
+query = query.join(Shop, Stock.id_shop == Shop.id).filter(Publisher.name == 'Microsoft Press')
 records = query.all()
 
-idpublisher = input('Введите id издалеля: ')
+#my first variant:
+# for Publisher, Book, Shop, Stock in records:
+#     if Publisher.name == 'Microsoft Press':
+#         print(f'Издатель {Publisher.name} имеется в продаже в {Shop.name}')
+#
 
-for Publisher, Book, Shop, Stock in records:
-    if Publisher.id == int(idpublisher):
-        print(Publisher.name)
-        break
+for s in records:
+    print(f'Издатель {s.Publisher.name} имеется в продаже в {s.Shop.name}')
 
-for Publisher, Book, Shop, Stock in records:
-    if Publisher.name == 'Microsoft Press':
-        print(f'Издатель {Publisher.name} имеется в продаже в {Shop.name}')
+idpublisher = int(input('Введите id издалеля: '))
+id_p = session.query(Publisher).filter(Publisher.id == idpublisher)
+for s in id_p.all():
+    print(s.name)
